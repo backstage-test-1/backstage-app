@@ -50,7 +50,7 @@ jobs:
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
-          password: ${{ secrets.PAT }}
+          password: ${{ secrets.GHCR_TOKEN }}
 
       - name: Extract metadata for Docker
         id: meta
@@ -72,7 +72,7 @@ jobs:
 
       - name: Update GitOps repository
         env:
-          GITOPS_TOKEN: ${{ secrets.PAT }}
+          GITOPS_TOKEN: ${{ secrets.GITOPS_TOKEN }}
           IMAGE_TAG: ${{ github.sha }}
         run: |
           git config --global user.name "github-actions[bot]"
