@@ -1,0 +1,103 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'packages/**'
+      - 'plugins/**'
+      - 'app-config*.yaml'
+      - 'backstage.json'
+      - 'package.json'
+      - '.github/workflows/**'
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: backstage-test-1/backstage
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout backstage-app
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Build TypeScript definitions
+        run: yarn tsc
+
+      - name: Build backend
+        run: yarn build:backend --config ../../app-config.yaml
+        working-directory: packages/backend
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.PAT }}
+
+      - name: Extract metadata for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=sha,prefix=,format=short
+            type=raw,value=latest
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./packages/backend/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Update GitOps repository
+        env:
+          GITOPS_TOKEN: ${{ secrets.PAT }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Clone GitOps repo
+          git clone https://x-access-token:${GITOPS_TOKEN}@github.com/backstage-test-1/backstage-manifests.git
+          cd backstage-manifests
+          
+          # Update image tag in deployment manifest
+          sed -i "s|image: ghcr.io/backstage-test-1/backstage:.*|image: ghcr.io/backstage-test-1/backstage:${IMAGE_TAG}|g" backstage/01-backstage.yaml
+          
+          # Commit and push if there are changes
+          if git diff --quiet; then
+            echo "No changes to commit"
+          else
+            git add backstage/01-backstage.yaml
+            git commit -m "Update backstage image to ${IMAGE_TAG}"
+            git push
+          fi
+
+      - name: Summary
+        run: |
+          echo "## Build Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- **Image**: ghcr.io/backstage-test-1/backstage:${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **GitOps Repo**: Updated backstage/01-backstage.yaml" >> $GITHUB_STEP_SUMMARY
+          echo "- **ArgoCD**: Will auto-sync the changes" >> $GITHUB_STEP_SUMMARY
