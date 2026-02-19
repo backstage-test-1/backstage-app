@@ -30,7 +30,8 @@ backend:
 
 auth:
   providers:
-    guest: {}
+    guest:
+      dangerouslyAllowOutsideDevelopment: true # 임시적으로 게스트 모드 허용
 
 catalog:
   # Overrides the default list locations from app-config.yaml as these contain example data.
