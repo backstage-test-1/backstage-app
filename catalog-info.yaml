@@ -6,6 +6,7 @@ metadata:
   annotations:
     github.com/project-slug: backstage-test-1/backstage-app
     backstage.io/techdocs-ref: dir:.
+    argocd/app-name: backstage
 spec:
   type: website
   owner: group:guests
