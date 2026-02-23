@@ -121,3 +121,11 @@ kubernetes:
 permission:
   # setting this to `false` will disable permissions
   enabled: true
+
+argocd:
+  appLocatorMethods:
+    - type: 'config'
+      instances:
+        - name: argoInstance1
+          url: ${ARGOCD_URL}
+          token: ${ARGOCD_AUTH_TOKEN}
