@@ -233,7 +233,7 @@ const websiteEntityPage = (
 
 const defaultEntityPage = (
   <EntityLayout>
-    <EntityLayout.Route path="/" title="Overview">
+    <EntityLayout.Route path="/" title="Overview ">
       {overviewContent}
     </EntityLayout.Route>
 
