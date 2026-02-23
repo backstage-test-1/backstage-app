@@ -1,0 +1,9 @@
+site_name: sth-backstage
+site_description: sth-backstage 애플리케이션 공식 문서
+
+plugins:
+  - techdocs-core
+
+nav:
+  - Home: index.md
+  - Architecture: architecture.md
