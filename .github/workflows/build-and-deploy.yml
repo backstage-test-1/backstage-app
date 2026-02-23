@@ -42,7 +42,7 @@ jobs:
         run: yarn tsc
 
       - name: Build backend
-        run: yarn build:backend --config ../../app-config.yaml --config ../../app-config.production.yaml
+        run: yarn build:backend --config ../../app-config.yaml
         working-directory: packages/backend
 
       - name: Log in to GitHub Container Registry
