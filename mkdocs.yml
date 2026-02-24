@@ -7,3 +7,5 @@ plugins:
 nav:
   - Home: index.md
   - Architecture: architecture.md
+  - Deployment: deployment.md
+  - Troubleshooting: troubleshooting.md
