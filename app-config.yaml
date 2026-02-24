@@ -117,6 +117,10 @@ catalog:
     - type: url
       target: https://github.com/backstage-test-1/backstage-app/blob/main/catalog-info.yaml
 
+    # backstage-manifests GitOps repository (Resource kind)
+    - type: url
+      target: https://github.com/backstage-test-1/backstage-manifests/blob/main/catalog-info.yaml
+
     ## Uncomment these lines to add more example data
     # - type: url
     #   target: https://github.com/backstage/backstage/blob/master/packages/catalog-model/examples/all.yaml
