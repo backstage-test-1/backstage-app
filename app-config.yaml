@@ -68,7 +68,7 @@ techdocs:
     type: 'local' # Alternatives - 'googleGcs' or 'awsS3'. Read documentation for using alternatives.
 
 auth:
-  # see https://backstage.io/docs/auth/ to learn about auth providers
+  environment: development
   providers:
     # See https://backstage.io/docs/auth/guest/provider
     guest:
@@ -79,8 +79,12 @@ auth:
         clientSecret: ${AUTH_GITHUB_CLIENT_SECRET}
         signIn:
           resolvers:
-            # Matches the GitHub username with the Backstage user entity name.
-            # See: https://backstage.io/docs/auth/github/provider#resolvers
+            - resolver: usernameMatchingUserEntityName
+      production:
+        clientId: ${AUTH_GITHUB_CLIENT_ID}
+        clientSecret: ${AUTH_GITHUB_CLIENT_SECRET}
+        signIn:
+          resolvers:
             - resolver: usernameMatchingUserEntityName
 
 scaffolder:
@@ -95,17 +99,17 @@ catalog:
   locations:
     # Local example data, file locations are relative to the backend process, typically `packages/backend`
     - type: file
-      target: ../../examples/entities.yaml
+      target: ./examples/entities.yaml
 
     # Local example template
     - type: file
-      target: ../../examples/template/template.yaml
+      target: ./examples/template/template.yaml
       rules:
         - allow: [Template]
 
     # Local example organizational data
     - type: file
-      target: ../../examples/org.yaml
+      target: ./examples/org.yaml
       rules:
         - allow: [User, Group]
 
