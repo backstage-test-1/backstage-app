@@ -1,5 +1,5 @@
-site_name: sth-backstage
-site_description: sth-backstage 애플리케이션 공식 문서
+site_name: backstage-app
+site_description: backstage-app 애플리케이션 공식 문서
 
 plugins:
   - techdocs-core

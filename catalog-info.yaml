@@ -1,7 +1,8 @@
 apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
-  name: sth-backstage
+  name: backstage-app
+  namespace: backstage-test-1
   description: An example of a Backstage application.
   annotations:
     github.com/project-slug: backstage-test-1/backstage-app

@@ -1,6 +1,6 @@
 # 🏗️ Architecture
 
-`sth-backstage` 는 Kubernetes 클러스터 상에서 운영되는 'backstage'입니다. 즉, 지금 사용하고 계시는 backstage 플랫폼 Source 입니다.
+`backstage-app` 는 Kubernetes 클러스터 상에서 운영되는 'backstage'입니다. 즉, 지금 사용하고 계시는 backstage 플랫폼 Source 입니다.
 
 ## 시스템 구성 요소
 
