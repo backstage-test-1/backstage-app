@@ -12,3 +12,5 @@ spec:
   type: website
   owner: group:guests
   lifecycle: experimental
+  dependsOn:
+    - resource:backstage-test-1/backstage-manifests
