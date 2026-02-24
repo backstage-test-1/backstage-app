@@ -12,7 +12,17 @@ kind: User
 metadata:
   name: squatboy
 spec:
-  memberOf: [guests]
+  memberOf: [devops]
+---
+# https://backstage.io/docs/features/software-catalog/descriptor-format#kind-group
+apiVersion: backstage.io/v1alpha1
+kind: Group
+metadata:
+  name: devops
+  namespace: backstage-test-1
+spec:
+  type: team
+  children: []
 ---
 # https://backstage.io/docs/features/software-catalog/descriptor-format#kind-group
 apiVersion: backstage.io/v1alpha1
