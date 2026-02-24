@@ -4,14 +4,6 @@ on:
   push:
     branches:
       - main
-    paths:
-      - 'docs/**'
-      - 'packages/**'
-      - 'plugins/**'
-      - 'app-config*.yaml'
-      - 'backstage.json'
-      - 'package.json'
-      - '.github/workflows/**'
 
 env:
   REGISTRY: ghcr.io
