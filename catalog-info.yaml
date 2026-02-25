@@ -9,8 +9,8 @@ metadata:
     backstage.io/techdocs-ref: dir:.
     argocd/app-name: backstage
 spec:
-  type: website
+  type: service
   owner: group:devops
   lifecycle: experimental
   dependsOn:
-    - resource:backstage-test-1/backstage-manifests
+    - component:backstage-test-1/backstage-manifests

@@ -4,6 +4,15 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'packages/**'
+      - 'plugins/**'
+      - 'yarn.lock'
+      - 'package.json'
+      - 'backstage.json'
+      - '.yarnrc.yml'
+      - 'packages/backend/Dockerfile'
+      - '.github/workflows/build-and-deploy.yml'
 
 env:
   REGISTRY: ghcr.io
