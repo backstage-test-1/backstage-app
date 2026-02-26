@@ -10,7 +10,7 @@ metadata:
     argocd/app-name: backstage
 spec:
   type: service
-  owner: group:devops
+  owner: group:default/devops
   lifecycle: experimental
   dependsOn:
     - component:backstage-test-1/backstage-manifests
