@@ -64,6 +64,7 @@ spec:
         repoUrl: github.com?owner=backstage-test-1&repo=${{ parameters.name }}
         defaultBranch: main
         repoVisibility: public
+        protectDefaultBranch: false 
 
     - id: register
       name: Backstage Catalog 등록
