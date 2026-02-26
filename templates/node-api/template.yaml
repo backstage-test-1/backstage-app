@@ -1,0 +1,92 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: node-api-template
+  title: Node.js API Service
+  description: Node.js (Express) API 서비스를 생성합니다. GitHub 레포, GitHub Actions CI, K8s 매니페스트가 자동으로 구성됩니다.
+  tags:
+    - node
+    - api
+    - express
+spec:
+  owner: group:backstage-test-1/devops
+  type: service
+
+  parameters:
+    - title: 서비스 기본 정보
+      required:
+        - name
+        - description
+      properties:
+        name:
+          title: 서비스 이름
+          type: string
+          description: GitHub 레포명으로 사용됩니다 (kebab-case, 예: my-api-service)
+          pattern: '^[a-z0-9]+(-[a-z0-9]+)*$'
+          ui:autofocus: true
+        description:
+          title: 서비스 설명
+          type: string
+          description: 서비스에 대한 간단한 설명
+        owner:
+          title: 오너
+          type: string
+          description: 서비스 담당자 (예: user:guest)
+          default: user:guest
+          ui:field: EntityPicker
+          ui:options:
+            catalogFilter:
+              kind: [User, Group]
+        port:
+          title: 앱 포트
+          type: integer
+          description: Express 앱이 사용할 포트
+          default: 3000
+          minimum: 1
+          maximum: 65535
+
+  steps:
+    - id: fetch-base
+      name: 서비스 코드 생성
+      action: fetch:template
+      input:
+        url: ./skeleton
+        values:
+          name: ${{ parameters.name }}
+          description: ${{ parameters.description }}
+          owner: ${{ parameters.owner }}
+          port: ${{ parameters.port }}
+
+    - id: publish
+      name: GitHub 레포 생성
+      action: publish:github
+      input:
+        allowedHosts: ['github.com']
+        description: ${{ parameters.description }}
+        repoUrl: github.com?owner=backstage-test-1&repo=${{ parameters.name }}
+        defaultBranch: main
+        repoVisibility: public
+
+    - id: register
+      name: Backstage Catalog 등록
+      action: catalog:register
+      input:
+        repoContentsUrl: ${{ steps['publish'].output.repoContentsUrl }}
+        catalogInfoPath: '/catalog-info.yaml'
+
+    - id: notify
+      name: 완료 알림
+      action: notification:send
+      input:
+        recipients: broadcast
+        title: '새 API 서비스 생성 완료'
+        info: '${{ parameters.name }} 레포지토리가 생성되었습니다.'
+        severity: normal
+
+  output:
+    links:
+      - title: GitHub 레포지토리
+        url: ${{ steps['publish'].output.remoteUrl }}
+      - title: Catalog에서 열기
+        icon: catalog
+        entityRef: ${{ steps['register'].output.entityRef }}
