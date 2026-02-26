@@ -9,6 +9,16 @@ class CustomPermissionPolicy implements PermissionPolicy {
     request: PolicyQuery,
     user?: BackstageIdentityResponse,
   ): Promise<PolicyDecision> {
+    // 사용자가 devops 그룹에 속해 있는지 확인합니다 (어드민 권한).
+    const isAdmin = user?.identity.ownershipEntityRefs.includes(
+      'group:default/devops',
+    );
+
+    if (isAdmin) {
+      // devops 그룹원은 모든 권한을 가집니다.
+      return { result: 'ALLOW' };
+    }
+
     // 현재 로그인된 사용자가 Guest인지 확인합니다.
     const isGuest = user?.identity.userEntityRef === 'user:default/guest';
 
