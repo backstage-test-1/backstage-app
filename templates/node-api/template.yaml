@@ -9,7 +9,7 @@ metadata:
     - api
     - express
 spec:
-  owner: group:backstage-test-1/devops
+  owner: group:devops
   type: service
 
   parameters:
