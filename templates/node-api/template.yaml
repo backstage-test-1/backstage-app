@@ -3,7 +3,7 @@ kind: Template
 metadata:
   name: node-api-template
   title: Node.js API Service
-  description: Node.js (Express) API 서비스를 생성합니다. GitHub 레포, GitHub Actions CI, K8s 매니페스트가 자동으로 구성됩니다.
+  description: 'Node.js (Express) API 서비스를 생성합니다. GitHub 레포, GitHub Actions CI, K8s 매니페스트가 자동으로 구성됩니다.'
   tags:
     - node
     - api
@@ -21,7 +21,7 @@ spec:
         name:
           title: 서비스 이름
           type: string
-          description: GitHub 레포명으로 사용됩니다 (kebab-case, 예: my-api-service)
+          description: 'GitHub 레포명으로 사용됩니다 (kebab-case, 예: my-api-service)'
           pattern: '^[a-z0-9]+(-[a-z0-9]+)*$'
           ui:autofocus: true
         description:
@@ -31,7 +31,7 @@ spec:
         owner:
           title: 오너
           type: string
-          description: 서비스 담당자 (예: user:guest)
+          description: '서비스 담당자 (예: user:guest)'
           default: user:guest
           ui:field: EntityPicker
           ui:options:
