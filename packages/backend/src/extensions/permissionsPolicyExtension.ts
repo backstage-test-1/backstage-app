@@ -9,7 +9,7 @@ class CustomPermissionPolicy implements PermissionPolicy {
     request: PolicyQuery,
     user?: BackstageIdentityResponse,
   ): Promise<PolicyDecision> {
-    // 사용자가 devops 그룹에 속해 있는지 확인합니다 (어드민 권한).
+    // 사용자가 devops 그룹 -> 어드민 권한
     const isAdmin = user?.identity.ownershipEntityRefs.includes(
       'group:default/devops',
     );
