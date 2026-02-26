@@ -60,7 +60,6 @@ spec:
       name: GitHub 레포 생성
       action: publish:github
       input:
-        allowedHosts: ['github.com']
         description: ${{ parameters.description }}
         repoUrl: github.com?owner=backstage-test-1&repo=${{ parameters.name }}
         defaultBranch: main
