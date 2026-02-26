@@ -31,9 +31,8 @@ spec:
         owner:
           title: 오너
           type: string
-          description: '서비스 담당자 (예: user:guest)'
-          default: user:guest
-          ui:field: EntityPicker
+          description: '서비스 담당자 (본인 또는 소속 팀만 선택 가능)'
+          ui:field: OwnerPicker
           ui:options:
             catalogFilter:
               kind: [User, Group]
