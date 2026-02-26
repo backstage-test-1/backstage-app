@@ -107,6 +107,12 @@ catalog:
       rules:
         - allow: [Template]
 
+    # Node.js API template
+    - type: file
+      target: ./templates/node-api/template.yaml
+      rules:
+        - allow: [Template]
+
     # Local example organizational data
     - type: file
       target: ./examples/org.yaml
