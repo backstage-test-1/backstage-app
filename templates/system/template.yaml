@@ -43,7 +43,7 @@ spec:
 
     - id: publish
       name: Publish to Catalog
-      action: publish:github:push
+      action: publish:github
       input:
         repoUrl: github.com?owner=backstage-test-1&repo=backstage-app
         branchName: main
