@@ -37,24 +37,28 @@ spec:
       action: fetch:template
       input:
         url: ./skeleton
+        targetPath: 'backstage/catalog/systems/${{ parameters.name }}'
         values:
           name: ${{ parameters.name }}
           owner: ${{ parameters.owner }}
 
     - id: publish
       name: Publish to Catalog
-      action: publish:github:pull-request
+      action: publish:github:push
       input:
         repoUrl: github.com?owner=backstage-test-1&repo=backstage-app
-        title: 'Add system ${{ parameters.name }}'
-        description: 'This PR adds the catalog info for the new system ${{ parameters.name }}'
-        branchName: 'add-system-${{ parameters.name }}'
-        targetBranchName: main
-        commitMessage: 'Add system ${{ parameters.name }}'
-        targetPath: 'backstage/catalog/systems/${{ parameters.name }}'
+        defaultBranch: main
+        gitCommitMessage: 'Add system ${{ parameters.name }}'
+
+    - id: register
+      name: Register
+      action: catalog:register
+      input:
+        repoContentsUrl: ${{ steps['publish'].output.repoContentsUrl }}
+        catalogInfoPath: 'catalog-info.yaml'
 
   output:
     links:
-      - title: Open Pull Request
-        icon: github
-        url: ${{ steps['publish'].output.remoteUrl }}
+      - title: Open in catalog
+        icon: catalog
+        entityRef: ${{ steps['register'].output.entityRef }}
