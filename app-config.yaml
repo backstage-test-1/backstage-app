@@ -106,6 +106,12 @@ catalog:
       rules:
         - allow: [Template]
 
+    # Logical systems location
+    - type: file
+      target: ./catalog/systems/
+      rules:
+        - allow: [System]
+
     # Local example organizational data
     - type: file
       target: ./examples/org.yaml

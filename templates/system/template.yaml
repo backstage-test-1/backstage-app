@@ -1,0 +1,64 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: system-template
+  title: Create a New System
+  description: '시스템 이름과 소유자만 입력하여 새로운 시스템을 생성합니다.'
+  tags:
+    - recommended
+    - organizational
+spec:
+  owner: group:devops
+  type: system
+
+  parameters:
+    - title: 시스템 정보 입력
+      required:
+        - name
+        - owner
+      properties:
+        name:
+          title: Name
+          type: string
+          description: '시스템의 고유 이름 (예: my-system)'
+          ui:autofocus: true
+        owner:
+          title: Owner
+          type: string
+          description: '시스템 소유자 (User 또는 Group)'
+          ui:field: OwnerPicker
+          ui:options:
+            catalogFilter:
+              kind: [Group, User]
+
+  steps:
+    - id: fetch-base
+      name: Fetch Base
+      action: fetch:template
+      input:
+        url: ./skeleton
+        values:
+          name: ${{ parameters.name }}
+          owner: ${{ parameters.owner }}
+
+    - id: publish
+      name: Publish to Catalog
+      action: publish:github:push
+      input:
+        repoUrl: github.com?owner=backstage-test-1&repo=backstage-app
+        branchName: main
+        commitMessage: 'Add system ${{ parameters.name }}'
+        targetPath: 'backstage/catalog/systems/${{ parameters.name }}'
+
+    - id: register
+      name: Register
+      action: catalog:register
+      input:
+        repoContentsUrl: ${{ steps['publish'].output.remoteUrl }}
+        catalogInfoPath: '/catalog-info.yaml'
+
+  output:
+    links:
+      - title: Open in catalog
+        icon: catalog
+        entityRef: ${{ steps['register'].output.entityRef }}
