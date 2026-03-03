@@ -44,18 +44,21 @@ spec:
 
     - id: publish
       name: Publish to Catalog
-      action: publish:github:push
+      action: publish:github:pull-request
       input:
         repoUrl: github.com?owner=backstage-test-1&repo=backstage-app
-        defaultBranch: main
-        gitCommitMessage: 'Add system ${{ parameters.name }}'
+        branchName: 'add-system-${{ parameters.name }}'
+        title: 'Add system ${{ parameters.name }}'
+        description: 'Adds catalog entry for system ${{ parameters.name }}'
+        sourcePath: 'backstage/catalog/systems/${{ parameters.name }}'
+        targetPath: 'backstage/catalog/systems/${{ parameters.name }}'
 
     - id: register
       name: Register
       action: catalog:register
       input:
-        repoContentsUrl: ${{ steps['publish'].output.repoContentsUrl }}
-        catalogInfoPath: 'catalog-info.yaml'
+        catalogInfoUrl: 'https://github.com/backstage-test-1/backstage-app/blob/main/backstage/catalog/systems/${{ parameters.name }}/catalog-info.yaml'
+        optional: true
 
   output:
     links:
