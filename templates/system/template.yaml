@@ -43,10 +43,13 @@ spec:
 
     - id: publish
       name: Publish to Catalog
-      action: publish:github
+      action: publish:github:pull-request
       input:
         repoUrl: github.com?owner=backstage-test-1&repo=backstage-app
-        branchName: main
+        title: 'Add system ${{ parameters.name }}'
+        description: 'This PR adds the catalog info for the new system ${{ parameters.name }}'
+        branchName: 'add-system-${{ parameters.name }}'
+        targetBranchName: main
         commitMessage: 'Add system ${{ parameters.name }}'
         targetPath: 'backstage/catalog/systems/${{ parameters.name }}'
 
