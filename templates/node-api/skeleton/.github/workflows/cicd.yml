@@ -9,7 +9,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: backstage-test-1/${{ values.name }}
+  IMAGE_NAME: backstage-test-1/${{ values.systemName }}-${{ values.name }}
 
 jobs:
   build-and-push:
@@ -45,7 +45,7 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
           IMAGE_TAG="${{ '${{' }} github.sha }}"
-          sed -i "s|image: ghcr.io/backstage-test-1/${{ values.name }}:.*|image: ghcr.io/backstage-test-1/${{ values.name }}:${IMAGE_TAG}|g" k8s/deployment.yaml
+          sed -i "s|image: ghcr.io/backstage-test-1/${{ values.systemName }}-${{ values.name }}:.*|image: ghcr.io/backstage-test-1/${{ values.systemName }}-${{ values.name }}:${IMAGE_TAG}|g" k8s/deployment.yaml
 
           if git diff --quiet; then
             echo "No changes to commit"

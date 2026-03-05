@@ -19,25 +19,25 @@ spec:
         - description
         - system
       properties:
-        name:
-          title: 서비스 이름
+        system:
+          title: 소속 시스템
           type: string
-          description: 'GitHub 레포명으로 사용됩니다 (kebab-case, 예: my-api-service)'
+          description: '이 서비스가 속할 System을 선택하세요. 선택한 System 이름이 레포 prefix 및 K8s 네임스페이스로 사용됩니다.'
+          ui:field: EntityPicker
+          ui:options:
+            catalogFilter:
+              kind: [System]
+            defaultNamespace: default
+        name:
+          title: 서비스 suffix
+          type: string
+          description: '서비스의 고유 suffix (kebab-case, 예: main-api). 실제 레포명은 {system}-{suffix} 형태가 됩니다.'
           pattern: '^[a-z0-9]+(-[a-z0-9]+)*$'
           ui:autofocus: true
         description:
           title: 서비스 설명
           type: string
           description: 서비스에 대한 간단한 설명
-        system:
-          title: 소속 시스템
-          type: string
-          description: '이 서비스가 속할 System을 선택하세요.'
-          ui:field: EntityPicker
-          ui:options:
-            catalogFilter:
-              kind: [System]
-            defaultNamespace: default
         owner:
           title: 오너
           type: string
@@ -62,6 +62,7 @@ spec:
         url: ./skeleton
         values:
           name: ${{ parameters.name }}
+          systemName: '${{ parameters.system | replace("system:default/", "") }}'
           description: ${{ parameters.description }}
           system: ${{ parameters.system }}
           owner: ${{ parameters.owner }}
@@ -72,10 +73,10 @@ spec:
       action: publish:github
       input:
         description: ${{ parameters.description }}
-        repoUrl: github.com?owner=backstage-test-1&repo=${{ parameters.name }}
+        repoUrl: 'github.com?owner=backstage-test-1&repo=${{ parameters.system | replace("system:default/", "") }}-${{ parameters.name }}'
         defaultBranch: main
         repoVisibility: public
-        protectDefaultBranch: false 
+        protectDefaultBranch: false
 
     - id: register
       name: Backstage Catalog 등록
@@ -90,7 +91,7 @@ spec:
       input:
         recipients: broadcast
         title: '새 API 서비스 생성 완료'
-        info: '${{ parameters.name }} 레포지토리가 생성되었습니다.'
+        info: '${{ parameters.system | replace("system:default/", "") }}-${{ parameters.name }} 레포지토리가 생성되었습니다.'
         severity: normal
 
   output:
