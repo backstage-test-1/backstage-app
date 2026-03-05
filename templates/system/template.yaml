@@ -20,8 +20,13 @@ spec:
         name:
           title: Name
           type: string
-          description: '시스템의 고유 이름 (예: my-system)'
+          description: '시스템의 고유 이름 (kebab-case, 예: kakao-taxi). GitHub 레포 prefix 및 K8s 네임스페이스로 사용됩니다.'
+          pattern: '^[a-z0-9]+(-[a-z0-9]+)*$'
           ui:autofocus: true
+        description:
+          title: Description
+          type: string
+          description: '시스템에 대한 간단한 설명'
         owner:
           title: Owner
           type: string
@@ -40,16 +45,17 @@ spec:
         targetPath: 'backstage/catalog/systems/${{ parameters.name }}'
         values:
           name: ${{ parameters.name }}
+          description: ${{ parameters.description }}
           owner: ${{ parameters.owner }}
 
     - id: publish
-      name: Publish to Catalog
+      name: Publish to Catalog (PR)
       action: publish:github:pull-request
       input:
         repoUrl: github.com?owner=backstage-test-1&repo=backstage-app
         branchName: 'add-system-${{ parameters.name }}'
-        title: 'Add system ${{ parameters.name }}'
-        description: 'Adds catalog entry for system ${{ parameters.name }}'
+        title: 'catalog: add system entity ${{ parameters.name }}'
+        description: 'Adds catalog entry for system `${{ parameters.name }}`'
         sourcePath: 'backstage/catalog/systems/${{ parameters.name }}'
         targetPath: 'backstage/catalog/systems/${{ parameters.name }}'
 
@@ -57,8 +63,7 @@ spec:
       name: Register
       action: catalog:register
       input:
-        catalogInfoUrl: 'https://github.com/backstage-test-1/backstage-app/blob/main/backstage/catalog/systems/${{ parameters.name }}/catalog-info.yaml'
-        optional: true
+        catalogInfoUrl: 'https://github.com/backstage-test-1/backstage-app/blob/add-system-${{ parameters.name }}/backstage/catalog/systems/${{ parameters.name }}/catalog-info.yaml'
 
   output:
     links:
