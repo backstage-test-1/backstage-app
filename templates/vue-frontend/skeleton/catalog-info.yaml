@@ -1,0 +1,15 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: ${{ values.systemName }}-${{ values.name }}
+  description: ${{ values.description }}
+  annotations:
+    github.com/project-slug: backstage-test-1/${{ values.systemName }}-${{ values.name }}
+    backstage.io/kubernetes-id: ${{ values.systemName }}-${{ values.name }}
+    argocd/app-name: ${{ values.systemName }}-${{ values.name }}
+    backstage.io/techdocs-ref: dir:.
+spec:
+  type: website
+  owner: ${{ values.owner }}
+  lifecycle: experimental
+  system: ${{ values.systemName }}

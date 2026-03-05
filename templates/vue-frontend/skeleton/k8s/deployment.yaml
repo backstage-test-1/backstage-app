@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ${{ values.systemName }}-${{ values.name }}
+  namespace: ${{ values.systemName }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ${{ values.systemName }}-${{ values.name }}
+  template:
+    metadata:
+      labels:
+        app: ${{ values.systemName }}-${{ values.name }}
+    spec:
+      containers:
+        - name: ${{ values.systemName }}-${{ values.name }}
+          image: ghcr.io/backstage-test-1/${{ values.systemName }}-${{ values.name }}:latest
+          ports:
+            - containerPort: ${{ values.port | int }}
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: ${{ values.port | int }}
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: ${{ values.port | int }}
+            initialDelaySeconds: 15
+            periodSeconds: 20

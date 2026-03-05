@@ -1,16 +1,16 @@
 apiVersion: scaffolder.backstage.io/v1beta3
 kind: Template
 metadata:
-  name: node-api-template
-  title: Node.js API Service
-  description: 'Node.js (Express) API 서비스를 생성합니다. GitHub 레포, GitHub Actions CI, K8s 매니페스트가 자동으로 구성됩니다.'
+  name: vue-frontend-template
+  title: Vue.js Frontend Service
+  description: 'Vue.js 3 프론트엔드 서비스를 생성합니다. GitHub 레포, GitHub Actions CI, K8s 매니페스트가 자동으로 구성됩니다.'
   tags:
-    - node
-    - api
-    - express
+    - vue
+    - frontend
+    - website
 spec:
   owner: group:devops
-  type: service
+  type: website
 
   parameters:
     - title: 서비스 기본 정보
@@ -31,7 +31,7 @@ spec:
         name:
           title: 서비스 이름
           type: string
-          description: '서비스의 고유 이름 (kebab-case, 예: main-api). 실제 레포명은 {system}-{suffix} 형태가 됩니다.'
+          description: '서비스의 고유 이름 (kebab-case, 예: webpage). 실제 레포명은 {system}-{suffix} 형태가 됩니다.'
           pattern: '^[a-z0-9]+(-[a-z0-9]+)*$'
           ui:autofocus: true
         description:
@@ -49,8 +49,8 @@ spec:
         port:
           title: 앱 포트
           type: integer
-          description: Express 앱이 사용할 포트
-          default: 3000
+          description: Nginx가 사용할 포트
+          default: 80
           minimum: 1
           maximum: 65535
 
@@ -90,7 +90,7 @@ spec:
       action: notification:send
       input:
         recipients: broadcast
-        title: '새 API 서비스 생성 완료'
+        title: '새 Frontend 서비스 생성 완료'
         info: '${{ parameters.system | replace("system:default/", "") }}-${{ parameters.name }} 레포지토리가 생성되었습니다.'
         severity: normal
 
