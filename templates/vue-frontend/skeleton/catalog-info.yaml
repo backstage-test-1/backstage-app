@@ -5,7 +5,6 @@ metadata:
   description: ${{ values.description }}
   annotations:
     github.com/project-slug: backstage-test-1/${{ values.systemName }}-${{ values.name }}
-    backstage.io/kubernetes-id: ${{ values.systemName }}-${{ values.name }}
     argocd/app-name: ${{ values.systemName }}-${{ values.name }}
     backstage.io/techdocs-ref: dir:.
 spec:
