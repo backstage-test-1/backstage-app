@@ -48,8 +48,7 @@ backend.add(import('@backstage/plugin-search-backend-module-pg'));
 backend.add(import('@backstage/plugin-search-backend-module-catalog'));
 backend.add(import('@backstage/plugin-search-backend-module-techdocs'));
 
-// kubernetes plugin
-backend.add(import('@backstage/plugin-kubernetes-backend'));
+
 
 // ArgoCD plugin
 backend.add(import('@roadiehq/backstage-plugin-argo-cd-backend'));
