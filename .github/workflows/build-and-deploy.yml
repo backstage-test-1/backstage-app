@@ -7,16 +7,21 @@ on:
     paths:
       - 'packages/**'
       - 'plugins/**'
+      - 'scripts/**'
       - 'yarn.lock'
       - 'package.json'
       - 'backstage.json'
       - '.yarnrc.yml'
+      - 'packages/app/Dockerfile'
+      - 'packages/app/nginx.conf'
       - 'packages/backend/Dockerfile'
       - '.github/workflows/build-and-deploy.yml'
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: backstage-test-1/backstage
+  BACKEND_IMAGE_NAME: backstage-test-1/backstage-backend
+  FRONTEND_IMAGE_NAME: backstage-test-1/backstage-frontend
+  GITOPS_REPO_DIR: backstage-manifests
 
 jobs:
   build-and-push:
@@ -40,12 +45,27 @@ jobs:
       - name: Install dependencies
         run: yarn install --immutable
 
+      - name: Clone GitOps repository
+        env:
+          GITOPS_TOKEN: ${{ secrets.GITOPS_TOKEN }}
+        run: |
+          git clone https://x-access-token:${GITOPS_TOKEN}@github.com/backstage-test-1/backstage-manifests.git "${GITOPS_REPO_DIR}"
+
+      - name: Extract build config from Kubernetes ConfigMap
+        id: build-config
+        run: |
+          BUILD_CONFIG_PATH="${RUNNER_TEMP}/app-config.build.yaml"
+          node scripts/extract-k8s-app-config.cjs "${GITOPS_REPO_DIR}/backstage/03-app-config-cm.yaml" "${BUILD_CONFIG_PATH}"
+          echo "build_config_path=${BUILD_CONFIG_PATH}" >> "$GITHUB_OUTPUT"
+
       - name: Build TypeScript definitions
         run: yarn tsc
 
+      - name: Build frontend
+        run: yarn workspace app build --config "${{ steps.build-config.outputs.build_config_path }}"
+
       - name: Build backend
-        run: yarn build:backend --config ../../app-config.yaml
-        working-directory: packages/backend
+        run: yarn workspace backend build
 
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
@@ -54,44 +74,56 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GHCR_TOKEN }}
 
-      - name: Build and push Docker image
+      - name: Build and push backend Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
           file: ./packages/backend/Dockerfile
           push: true
           tags: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+            ${{ env.REGISTRY }}/${{ env.BACKEND_IMAGE_NAME }}:${{ github.sha }}
+            ${{ env.REGISTRY }}/${{ env.BACKEND_IMAGE_NAME }}:latest
+
+      - name: Build and push frontend Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./packages/app/Dockerfile
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE_NAME }}:${{ github.sha }}
+            ${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE_NAME }}:latest
 
       - name: Update GitOps repository
         env:
-          GITOPS_TOKEN: ${{ secrets.GITOPS_TOKEN }}
           IMAGE_TAG: ${{ github.sha }}
         run: |
+          set -euo pipefail
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           
-          # Clone GitOps repo
-          git clone https://x-access-token:${GITOPS_TOKEN}@github.com/backstage-test-1/backstage-manifests.git
-          cd backstage-manifests
-          
-          # Update image tag in deployment manifest
-          sed -i "s|image: ghcr.io/backstage-test-1/backstage:.*|image: ghcr.io/backstage-test-1/backstage:${IMAGE_TAG}|g" backstage/01-backstage.yaml
+          # Update image tags in deployment manifests
+          test -f "${GITOPS_REPO_DIR}/backstage/01-backstage.yaml"
+          test -f "${GITOPS_REPO_DIR}/backstage/04-backstage-frontend.yaml"
+          sed -i "s|image: ghcr.io/backstage-test-1/backstage-backend:.*|image: ghcr.io/backstage-test-1/backstage-backend:${IMAGE_TAG}|g" "${GITOPS_REPO_DIR}/backstage/01-backstage.yaml"
+          sed -i "s|image: ghcr.io/backstage-test-1/backstage-frontend:.*|image: ghcr.io/backstage-test-1/backstage-frontend:${IMAGE_TAG}|g" "${GITOPS_REPO_DIR}/backstage/04-backstage-frontend.yaml"
+
+          cd "${GITOPS_REPO_DIR}"
           
           # Commit and push if there are changes
           if git diff --quiet; then
             echo "No changes to commit"
           else
-            git add backstage/01-backstage.yaml
-            git commit -m "Update backstage image to ${IMAGE_TAG}"
+            git add backstage
+            git commit -m "Sync backstage manifests and images to ${IMAGE_TAG}"
             git push
           fi
 
       - name: Summary
         run: |
           echo "## Build Summary" >> $GITHUB_STEP_SUMMARY
-          echo "- **Image**: ghcr.io/backstage-test-1/backstage:${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Backend Image**: ghcr.io/backstage-test-1/backstage-backend:${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Frontend Image**: ghcr.io/backstage-test-1/backstage-frontend:${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Commit**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **GitOps Repo**: Updated backstage/01-backstage.yaml" >> $GITHUB_STEP_SUMMARY
+          echo "- **GitOps Repo**: Reused the GitOps ConfigMap for the frontend build and pinned both image tags" >> $GITHUB_STEP_SUMMARY
           echo "- **ArgoCD**: Will auto-sync the changes" >> $GITHUB_STEP_SUMMARY
