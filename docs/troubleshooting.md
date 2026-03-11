@@ -16,7 +16,8 @@ Backstage 운영 중 발생할 수 있는 주요 이슈와 그에 대한 해결 
 
 ## 4. ArgoCD 플러그인 401 Unauthorized 오류
 - **원인:** `ARGOCD_URL`이 HTTP로 설정되어 리다이렉트가 발생하고, 이 과정에서 인증 헤더가 손실되는 문제입니다.
-- **해결:** Kubernetes 배포 명세서(`01-backstage.yaml`)에서 `ARGOCD_URL`을 `https` 주소로 명시적으로 변경하여 리다이렉트를 방지합니다.
+- **적용된 해결:** 현재 운영 환경은 `argocd-cmd-params-cm`에 `server.insecure: "true"`를 적용해 Argo CD의 내부 TLS를 끈 상태입니다. 따라서 Backstage의 `ARGOCD_URL`은 `http://argocd-server.argocd.svc.cluster.local`로 유지하고, ingress도 HTTP 백엔드(Service 80)에 맞춰야 합니다.
+- **대안:** 나중에 Argo CD TLS를 다시 켜면 `ARGOCD_URL`도 `https`로 되돌리고 ingress도 HTTPS / Service 443 기준으로 함께 바꿔야 합니다.
 
 ## 5. 플러그인 추가 시 버전 호환성 문제
 - **원인:** 새로운 플러그인을 추가할 때 기존 Backstage 코어 패키지와 버전이 일치하지 않거나, 의존성 충돌로 인해 `Invalid registration type` 등의 오류가 발생할 수 있습니다.
