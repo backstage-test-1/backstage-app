@@ -2,6 +2,8 @@ apiVersion: backstage.io/v1alpha1
 kind: System
 metadata:
   name: ${{ values.name }}
-  description: ${{ values.description }}
+  {%- if values.description %}
+  description: ${{ values.description | dump }}
+  {%- endif %}
 spec:
   owner: ${{ values.owner }}
