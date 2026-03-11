@@ -1,13 +1,13 @@
 apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
-  name: ${{ values.systemName }}-${{ values.name }}
+  name: ${{ values.name }}
   {%- if values.description %}
   description: ${{ values.description | dump }}
   {%- endif %}
   annotations:
-    github.com/project-slug: backstage-test-1/${{ values.systemName }}-${{ values.name }}
-    argocd/app-name: ${{ values.systemName }}-${{ values.name }}
+    github.com/project-slug: backstage-test-1/${{ values.name }}
+    argocd/app-name: ${{ values.name }}
     backstage.io/techdocs-ref: dir:.
 spec:
   type: website

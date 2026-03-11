@@ -1,4 +1,4 @@
-site_name: ${{ values.systemName }}-${{ values.name }}
+site_name: ${{ values.name }}
 
 nav:
   - Home: index.md

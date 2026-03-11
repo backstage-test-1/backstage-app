@@ -22,7 +22,7 @@ spec:
         system:
           title: 소속 시스템
           type: string
-          description: '이 서비스가 속할 System을 선택하세요. 선택한 System 이름이 레포 prefix 및 K8s 네임스페이스로 사용됩니다.'
+          description: '이 서비스가 속할 System을 선택하세요.'
           ui:field: EntityPicker
           ui:options:
             catalogFilter:
@@ -31,7 +31,7 @@ spec:
         name:
           title: 서비스 이름
           type: string
-          description: '서비스의 고유 이름 (kebab-case, 예: webpage). 실제 레포명은 {system}-{suffix} 형태가 됩니다.'
+          description: '서비스의 고유 이름 (kebab-case, 예: webpage). 실제 GitHub 레포, Catalog, 배포 리소스 이름으로 사용됩니다.'
           pattern: '^[a-z0-9]+(-[a-z0-9]+)*$'
           ui:autofocus: true
         description:
@@ -73,7 +73,7 @@ spec:
       action: publish:github
       input:
         description: ${{ parameters.description }}
-        repoUrl: 'github.com?owner=backstage-test-1&repo=${{ parameters.system | replace("system:default/", "") }}-${{ parameters.name }}'
+        repoUrl: 'github.com?owner=backstage-test-1&repo=${{ parameters.name }}'
         defaultBranch: main
         repoVisibility: public
         protectDefaultBranch: false
@@ -91,7 +91,7 @@ spec:
       input:
         recipients: broadcast
         title: '새 Frontend 서비스 생성 완료'
-        info: '${{ parameters.system | replace("system:default/", "") }}-${{ parameters.name }} 레포지토리가 생성되었습니다.'
+        info: '${{ parameters.name }} 레포지토리가 생성되었습니다.'
         severity: normal
 
   output:

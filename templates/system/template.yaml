@@ -20,7 +20,7 @@ spec:
         name:
           title: Name
           type: string
-          description: '시스템의 고유 이름 (kebab-case, 예: mycompany-taxi). GitHub 레포 prefix 및 K8s 네임스페이스로 사용됩니다.'
+          description: '시스템의 고유 이름입니다 (kebab-case, 예: mycompany-taxi).'
           pattern: '^[a-z0-9]+(-[a-z0-9]+)*$'
           ui:autofocus: true
         description:

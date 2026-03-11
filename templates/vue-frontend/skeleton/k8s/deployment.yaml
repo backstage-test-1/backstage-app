@@ -1,21 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ${{ values.systemName }}-${{ values.name }}
+  name: ${{ values.name }}
   namespace: ${{ values.systemName }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: ${{ values.systemName }}-${{ values.name }}
+      app: ${{ values.name }}
   template:
     metadata:
       labels:
-        app: ${{ values.systemName }}-${{ values.name }}
+        app: ${{ values.name }}
     spec:
       containers:
-        - name: ${{ values.systemName }}-${{ values.name }}
-          image: ghcr.io/backstage-test-1/${{ values.systemName }}-${{ values.name }}:latest
+        - name: ${{ values.name }}
+          image: ghcr.io/backstage-test-1/${{ values.name }}:latest
           ports:
             - containerPort: ${{ values.port | int }}
           readinessProbe:
