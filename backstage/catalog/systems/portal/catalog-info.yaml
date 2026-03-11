@@ -1,0 +1,6 @@
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: portal
+spec:
+  owner: group:default/devops
