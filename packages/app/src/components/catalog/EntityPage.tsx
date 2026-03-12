@@ -135,14 +135,6 @@ const overviewContent = (
       <EntityCatalogGraphCard variant="gridItem" height={400} />
     </Grid>
 
-    <EntitySwitch>
-      <EntitySwitch.Case if={isArgocdAvailable}>
-        <Grid item md={12} xs={12}>
-          <EntityArgoCDOverviewCard />
-        </Grid>
-      </EntitySwitch.Case>
-    </EntitySwitch>
-
     <Grid item md={4} xs={12}>
       <EntityLinksCard />
     </Grid>
@@ -150,6 +142,35 @@ const overviewContent = (
       <EntityHasSubcomponentsCard variant="gridItem" />
     </Grid>
   </Grid>
+);
+
+const argocdContent = (
+  <EntitySwitch>
+    <EntitySwitch.Case if={isArgocdAvailable}>
+      <Grid container spacing={3}>
+        <Grid item md={12} xs={12}>
+          <EntityArgoCDOverviewCard />
+        </Grid>
+      </Grid>
+    </EntitySwitch.Case>
+
+    <EntitySwitch.Case>
+      <EmptyState
+        title="No ArgoCD available for this entity"
+        missing="info"
+        description="You need to add an annotation 'argocd/app-name' to your component if you want to enable ArgoCD for it."
+        action={
+          <Button
+            variant="contained"
+            color="primary"
+            href="https://backstage.io/docs/features/software-catalog/well-known-annotations"
+          >
+            Read more
+          </Button>
+        }
+      />
+    </EntitySwitch.Case>
+  </EntitySwitch>
 );
 
 const serviceEntityPage = (
