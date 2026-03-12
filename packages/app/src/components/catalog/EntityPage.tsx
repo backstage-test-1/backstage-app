@@ -65,6 +65,10 @@ import useAsync from 'react-use/lib/useAsync';
 import {
   isArgocdAvailable,
   EntityArgoCDOverviewCard,
+  argoCDApiRef,
+  ARGOCD_ANNOTATION_APP_NAME,
+  ARGOCD_ANNOTATION_APP_SELECTOR,
+  ARGOCD_ANNOTATION_PROJECT_NAME,
 } from '@roadiehq/backstage-plugin-argo-cd';
 
 const useStyles = makeStyles(theme => ({
@@ -129,6 +133,63 @@ const CICDTabTitle = () => {
   return (
     <Box display="flex" alignItems="center">
       CI/CD
+      {!loading && !error && value && statusClass && (
+        <Tooltip title={tooltipTitle}>
+          <span className={`${classes.statusDot} ${statusClass}`} />
+        </Tooltip>
+      )}
+    </Box>
+  );
+};
+
+const ArgoCDTabTitle = () => {
+  const { entity } = useEntity();
+  const api = useApi(argoCDApiRef);
+  const classes = useStyles();
+
+  const appName = entity?.metadata?.annotations?.[ARGOCD_ANNOTATION_APP_NAME];
+  const appSelector = entity?.metadata?.annotations?.[ARGOCD_ANNOTATION_APP_SELECTOR];
+  const projectName = entity?.metadata?.annotations?.[ARGOCD_ANNOTATION_PROJECT_NAME];
+
+  const hasAnnotation = Boolean(appName || appSelector || projectName);
+
+  const { value, loading, error } = useAsync(async () => {
+    if (!hasAnnotation) return null;
+    if (appName) {
+      return await api.getAppDetails({ url: '', appName });
+    } else if (appSelector) {
+      const list = await api.getAppListDetails({ url: '', appSelector });
+      return list?.items?.[0] || null;
+    }
+    return null;
+  }, [appName, appSelector, api, hasAnnotation]);
+
+  if (!hasAnnotation) {
+    return <span>ArgoCD</span>;
+  }
+
+  let statusClass = '';
+  let tooltipTitle = '';
+
+  if (value) {
+    const healthStatus = value.status?.health?.status;
+    const syncStatus = value.status?.sync?.status;
+    
+    if (healthStatus === 'Healthy' && syncStatus === 'Synced') {
+      statusClass = classes.statusSuccess;
+      tooltipTitle = `Health: ${healthStatus}, Sync: ${syncStatus}`;
+    } else if (healthStatus === 'Degraded' || syncStatus === 'OutOfSync') {
+      statusClass = classes.statusFailure;
+      tooltipTitle = `Health: ${healthStatus}, Sync: ${syncStatus}`;
+    } else if (healthStatus || syncStatus) {
+      statusClass = classes.statusPending;
+      tooltipTitle = `Health: ${healthStatus}, Sync: ${syncStatus}`;
+    }
+  }
+
+  return (
+    <Box display="flex" alignItems="center">
+      ArgoCD
       {!loading && !error && value && statusClass && (
         <Tooltip title={tooltipTitle}>
           <span className={`${classes.statusDot} ${statusClass}`} />
@@ -257,7 +318,7 @@ const serviceEntityPage = (
       {cicdContent}
     </EntityLayout.Route>
 
-    <EntityLayout.Route path="/argocd" title="ArgoCD">
+    <EntityLayout.Route path="/argocd" title="ArgoCD" tabProps={{ label: <ArgoCDTabTitle /> }}>
       {argocdContent}
     </EntityLayout.Route>
 
@@ -299,7 +360,7 @@ const websiteEntityPage = (
       {cicdContent}
     </EntityLayout.Route>
 
-    <EntityLayout.Route path="/argocd" title="ArgoCD">
+    <EntityLayout.Route path="/argocd" title="ArgoCD" tabProps={{ label: <ArgoCDTabTitle /> }}>
       {argocdContent}
     </EntityLayout.Route>
 
