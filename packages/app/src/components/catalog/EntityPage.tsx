@@ -1,4 +1,4 @@
-import { Button, Grid } from '@material-ui/core';
+import { Button, Grid, Box, Tooltip, makeStyles } from '@material-ui/core';
 import {
   EntityApiDefinitionCard,
   EntityConsumedApisCard,
@@ -27,6 +27,7 @@ import {
   hasRelationWarnings,
   EntityRelationWarning,
 } from '@backstage/plugin-catalog';
+import { useEntity } from '@backstage/plugin-catalog-react';
 import {
   EntityUserProfileCard,
   EntityGroupProfileCard,
@@ -56,11 +57,86 @@ import { ReportIssue } from '@backstage/plugin-techdocs-module-addons-contrib';
 import {
   isGithubActionsAvailable,
   EntityGithubActionsContent,
+  githubActionsApiRef,
+  GITHUB_ACTIONS_ANNOTATION,
 } from '@backstage-community/plugin-github-actions';
+import { useApi } from '@backstage/core-plugin-api';
+import useAsync from 'react-use/lib/useAsync';
 import {
   isArgocdAvailable,
   EntityArgoCDOverviewCard,
 } from '@roadiehq/backstage-plugin-argo-cd';
+
+const useStyles = makeStyles(theme => ({
+  statusDot: {
+    width: '10px',
+    height: '10px',
+    borderRadius: '50%',
+    display: 'inline-block',
+    marginLeft: theme.spacing(1),
+  },
+  statusSuccess: {
+    backgroundColor: theme.palette.success.main,
+  },
+  statusFailure: {
+    backgroundColor: theme.palette.error.main,
+  },
+  statusPending: {
+    backgroundColor: theme.palette.warning.main,
+  },
+}));
+
+const CICDTabTitle = () => {
+  const { entity } = useEntity();
+  const api = useApi(githubActionsApiRef);
+  const classes = useStyles();
+
+  const projectSlug =
+    entity?.metadata?.annotations?.[GITHUB_ACTIONS_ANNOTATION];
+
+  const { value, loading, error } = useAsync(async () => {
+    if (!projectSlug) return null;
+    const [owner, repo] = projectSlug.split('/');
+    const runs = await api.listWorkflowRuns({ owner, repo, pageSize: 1 });
+    return runs.workflow_runs?.[0];
+  }, [projectSlug, api]);
+
+  if (!projectSlug) {
+    return <span>CI/CD</span>;
+  }
+
+  let statusClass = '';
+  let tooltipTitle = '';
+
+  if (value) {
+    if (value.status === 'completed') {
+      if (value.conclusion === 'success') {
+        statusClass = classes.statusSuccess;
+        tooltipTitle = 'Latest build: Success';
+      } else if (value.conclusion === 'failure') {
+        statusClass = classes.statusFailure;
+        tooltipTitle = 'Latest build: Failure';
+      } else {
+        statusClass = classes.statusPending;
+        tooltipTitle = `Latest build: ${value.conclusion}`;
+      }
+    } else {
+      statusClass = classes.statusPending;
+      tooltipTitle = `Latest build: ${value.status}`;
+    }
+  }
+
+  return (
+    <Box display="flex" alignItems="center">
+      CI/CD
+      {!loading && !error && value && statusClass && (
+        <Tooltip title={tooltipTitle}>
+          <span className={`${classes.statusDot} ${statusClass}`} />
+        </Tooltip>
+      )}
+    </Box>
+  );
+};
 
 const techdocsContent = (
   <EntityTechdocsContent>
@@ -71,8 +147,6 @@ const techdocsContent = (
 );
 
 const cicdContent = (
-  // This is an example of how you can implement your company's logic in entity page.
-  // You can for example enforce that all components of type 'service' should use GitHubActions
   <EntitySwitch>
     <EntitySwitch.Case if={isGithubActionsAvailable}>
       <EntityGithubActionsContent />
@@ -82,7 +156,7 @@ const cicdContent = (
       <EmptyState
         title="No CI/CD available for this entity"
         missing="info"
-        description="You need to add an annotation to your component if you want to enable CI/CD for it. You can read more about annotations in Backstage by clicking the button below."
+        description="You need to add an annotation to your component if you want to enable CI/CD for it."
         action={
           <Button
             variant="contained"
@@ -179,8 +253,12 @@ const serviceEntityPage = (
       {overviewContent}
     </EntityLayout.Route>
 
-    <EntityLayout.Route path="/ci-cd" title="CI/CD">
+    <EntityLayout.Route path="/ci-cd" title="CI/CD" tabProps={{ label: <CICDTabTitle /> }}>
       {cicdContent}
+    </EntityLayout.Route>
+
+    <EntityLayout.Route path="/argocd" title="ArgoCD">
+      {argocdContent}
     </EntityLayout.Route>
 
     <EntityLayout.Route path="/api" title="API">
@@ -217,8 +295,12 @@ const websiteEntityPage = (
       {overviewContent}
     </EntityLayout.Route>
 
-    <EntityLayout.Route path="/ci-cd" title="CI/CD">
+    <EntityLayout.Route path="/ci-cd" title="CI/CD" tabProps={{ label: <CICDTabTitle /> }}>
       {cicdContent}
+    </EntityLayout.Route>
+
+    <EntityLayout.Route path="/argocd" title="ArgoCD">
+      {argocdContent}
     </EntityLayout.Route>
 
     <EntityLayout.Route path="/dependencies" title="Dependencies">
@@ -238,16 +320,9 @@ const websiteEntityPage = (
   </EntityLayout>
 );
 
-/**
- * NOTE: This page is designed to work on small screens such as mobile devices.
- * This is based on Material UI Grid. If breakpoints are used, each grid item must set the `xs` prop to a column size or to `true`,
- * since this does not default. If no breakpoints are used, the items will equitably share the available space.
- * https://material-ui.com/components/grid/#basic-grid.
- */
-
 const defaultEntityPage = (
   <EntityLayout>
-    <EntityLayout.Route path="/" title="Overview ">
+    <EntityLayout.Route path="/" title="Overview">
       {overviewContent}
     </EntityLayout.Route>
 
@@ -412,12 +487,24 @@ const domainPage = (
 
 export const entityPage = (
   <EntitySwitch>
-    <EntitySwitch.Case if={isKind('component')} children={componentPage} />
-    <EntitySwitch.Case if={isKind('api')} children={apiPage} />
-    <EntitySwitch.Case if={isKind('group')} children={groupPage} />
-    <EntitySwitch.Case if={isKind('user')} children={userPage} />
-    <EntitySwitch.Case if={isKind('system')} children={systemPage} />
-    <EntitySwitch.Case if={isKind('domain')} children={domainPage} />
+    <EntitySwitch.Case if={isKind('component')}>
+      {componentPage}
+    </EntitySwitch.Case>
+    <EntitySwitch.Case if={isKind('api')}>
+      {apiPage}
+    </EntitySwitch.Case>
+    <EntitySwitch.Case if={isKind('group')}>
+      {groupPage}
+    </EntitySwitch.Case>
+    <EntitySwitch.Case if={isKind('user')}>
+      {userPage}
+    </EntitySwitch.Case>
+    <EntitySwitch.Case if={isKind('system')}>
+      {systemPage}
+    </EntitySwitch.Case>
+    <EntitySwitch.Case if={isKind('domain')}>
+      {domainPage}
+    </EntitySwitch.Case>
 
     <EntitySwitch.Case>{defaultEntityPage}</EntitySwitch.Case>
   </EntitySwitch>
