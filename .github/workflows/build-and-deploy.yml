@@ -127,3 +127,40 @@ jobs:
           echo "- **Commit**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
           echo "- **GitOps Repo**: Reused the GitOps ConfigMap for the frontend build and pinned both image tags" >> $GITHUB_STEP_SUMMARY
           echo "- **ArgoCD**: Will auto-sync the changes" >> $GITHUB_STEP_SUMMARY
+
+  publish-techdocs:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install TechDocs CLI
+        run: npm install -g @techdocs/cli
+
+      - name: Generate TechDocs
+        run: techdocs-cli generate --no-docker
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Publish TechDocs to Azure Blob Storage
+        env:
+          AZURE_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
+          AZURE_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
+        run: |
+          techdocs-cli publish \
+            --publisher-type azureBlobStorage \
+            --storage-name techdocs-container \
+            --entity default/component/backstage-app

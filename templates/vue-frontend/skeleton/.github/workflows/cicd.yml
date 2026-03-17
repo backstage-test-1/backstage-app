@@ -17,6 +17,7 @@ jobs:
     permissions:
       contents: write
       packages: write
+      id-token: write
 
     steps:
       - name: Checkout
@@ -54,3 +55,31 @@ jobs:
             git commit -m "ci: update image tag to ${IMAGE_TAG} [skip ci]"
             git push
           fi
+
+      - name: Setup Node.js for TechDocs
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install TechDocs CLI
+        run: npm install -g @techdocs/cli
+
+      - name: Generate TechDocs
+        run: techdocs-cli generate --no-docker
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ '${{' }} vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ '${{' }} vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ '${{' }} vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Publish TechDocs to Azure Blob Storage
+        env:
+          AZURE_TENANT_ID: ${{ '${{' }} vars.AZURE_TENANT_ID }}
+          AZURE_CLIENT_ID: ${{ '${{' }} vars.AZURE_CLIENT_ID }}
+        run: |
+          techdocs-cli publish \
+            --publisher-type azureBlobStorage \
+            --storage-name techdocs-container \
+            --entity default/component/${{ values.name }}
