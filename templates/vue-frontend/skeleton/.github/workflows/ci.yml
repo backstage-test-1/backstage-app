@@ -61,6 +61,14 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install TechDocs core
+        run: pip install mkdocs-techdocs-core==1.*
+
       - name: Install TechDocs CLI
         run: npm install -g @techdocs/cli
 
