@@ -89,5 +89,6 @@ jobs:
         run: |
           techdocs-cli publish \
             --publisher-type azureBlobStorage \
+            --azureAccountName backstagetechdocs01 \
             --storage-name techdocs-container \
             --entity default/component/${{ values.name }}
