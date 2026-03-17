@@ -3,7 +3,7 @@ kind: Template
 metadata:
   name: node-api-template
   title: Node.js API Service
-  description: 'Node.js (Express) API 서비스를 생성합니다. GitHub 레포, GitHub Actions CI, K8s 매니페스트가 자동으로 구성됩니다.'
+  description: 'Node.js (Express) API 서비스를 생성합니다. GitHub 레포, GitHub Actions CI(수동 실행), K8s 매니페스트가 자동으로 구성됩니다.'
   tags:
     - node
     - api
