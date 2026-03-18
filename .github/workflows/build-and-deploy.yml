@@ -55,7 +55,7 @@ jobs:
         id: build-config
         run: |
           BUILD_CONFIG_PATH="${RUNNER_TEMP}/app-config.build.yaml"
-          node scripts/extract-k8s-app-config.cjs "${GITOPS_REPO_DIR}/backstage/03-app-config-cm.yaml" "${BUILD_CONFIG_PATH}"
+          node scripts/extract-k8s-app-config.cjs "${GITOPS_REPO_DIR}/platform/backstage/base/configmap-app-config.yaml" "${BUILD_CONFIG_PATH}"
           echo "build_config_path=${BUILD_CONFIG_PATH}" >> "$GITHUB_OUTPUT"
 
       - name: Build TypeScript definitions
@@ -103,10 +103,10 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           
           # Update image tags in deployment manifests
-          test -f "${GITOPS_REPO_DIR}/backstage/01-backstage.yaml"
-          test -f "${GITOPS_REPO_DIR}/backstage/04-backstage-frontend.yaml"
-          sed -i "s|image: ghcr.io/backstage-test-1/backstage-backend:.*|image: ghcr.io/backstage-test-1/backstage-backend:${IMAGE_TAG}|g" "${GITOPS_REPO_DIR}/backstage/01-backstage.yaml"
-          sed -i "s|image: ghcr.io/backstage-test-1/backstage-frontend:.*|image: ghcr.io/backstage-test-1/backstage-frontend:${IMAGE_TAG}|g" "${GITOPS_REPO_DIR}/backstage/04-backstage-frontend.yaml"
+          test -f "${GITOPS_REPO_DIR}/platform/backstage/base/deployment-backend.yaml"
+          test -f "${GITOPS_REPO_DIR}/platform/backstage/base/deployment-frontend.yaml"
+          sed -i "s|image: ghcr.io/backstage-test-1/backstage-backend:.*|image: ghcr.io/backstage-test-1/backstage-backend:${IMAGE_TAG}|g" "${GITOPS_REPO_DIR}/platform/backstage/base/deployment-backend.yaml"
+          sed -i "s|image: ghcr.io/backstage-test-1/backstage-frontend:.*|image: ghcr.io/backstage-test-1/backstage-frontend:${IMAGE_TAG}|g" "${GITOPS_REPO_DIR}/platform/backstage/base/deployment-frontend.yaml"
 
           cd "${GITOPS_REPO_DIR}"
           
@@ -114,7 +114,7 @@ jobs:
           if git diff --quiet; then
             echo "No changes to commit"
           else
-            git add backstage
+            git add platform/backstage
             git commit -m "Sync backstage manifests and images to ${IMAGE_TAG}"
             git push
           fi
