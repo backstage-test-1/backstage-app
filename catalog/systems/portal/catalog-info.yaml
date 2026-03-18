@@ -1,0 +1,7 @@
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: portal
+  description: "test for catalog creation and auto-pipeline"
+spec:
+  owner: group:default/devops
