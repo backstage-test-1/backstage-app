@@ -42,7 +42,7 @@ spec:
       action: fetch:template
       input:
         url: ./skeleton
-        targetPath: 'backstage/catalog/systems/${{ parameters.name }}'
+        targetPath: 'catalog/systems/${{ parameters.name }}'
         values:
           name: ${{ parameters.name }}
           description: ${{ parameters.description }}
@@ -56,14 +56,14 @@ spec:
         branchName: 'add-system-${{ parameters.name }}'
         title: 'catalog: add system entity ${{ parameters.name }}'
         description: 'Adds catalog entry for system `${{ parameters.name }}`'
-        sourcePath: 'backstage/catalog/systems/${{ parameters.name }}'
-        targetPath: 'backstage/catalog/systems/${{ parameters.name }}'
+        sourcePath: 'catalog/systems/${{ parameters.name }}'
+        targetPath: 'catalog/systems/${{ parameters.name }}'
 
     - id: register
       name: Register
       action: catalog:register
       input:
-        catalogInfoUrl: 'https://github.com/backstage-test-1/backstage-app/blob/add-system-${{ parameters.name }}/backstage/catalog/systems/${{ parameters.name }}/catalog-info.yaml'
+        catalogInfoUrl: 'https://github.com/backstage-test-1/backstage-app/blob/add-system-${{ parameters.name }}/catalog/systems/${{ parameters.name }}/catalog-info.yaml'
 
   output:
     links:
