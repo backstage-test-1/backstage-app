@@ -99,7 +99,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: ./packages/app/Dockerfile
+          file: ./packages/app/Dockerfile.techdocs-test
           push: true
           tags: |
             ${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE_NAME }}:${{ github.sha }}
