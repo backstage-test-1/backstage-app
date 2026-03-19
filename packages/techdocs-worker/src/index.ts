@@ -13,7 +13,7 @@ import type {
   GeneratorRunOptions,
   ParsedLocationAnnotation,
 } from '@backstage/plugin-techdocs-node';
-import winston from 'winston';
+import * as winston from 'winston';
 
 type SiteOptions = GeneratorRunOptions['siteOptions'];
 
