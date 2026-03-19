@@ -1,0 +1,125 @@
+name: Build TechDocs Remote Worker Images
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - feat/techdocs-remote-worker
+    paths:
+      - 'packages/app/**'
+      - 'packages/backend/**'
+      - 'packages/techdocs-worker/**'
+      - 'scripts/**'
+      - 'package.json'
+      - 'yarn.lock'
+      - 'backstage.json'
+      - '.yarnrc.yml'
+      - '.github/workflows/build-techdocs-remote-worker.yml'
+
+env:
+  REGISTRY: ghcr.io
+  BACKEND_IMAGE_NAME: backstage-test-1/backstage-backend
+  FRONTEND_IMAGE_NAME: backstage-test-1/backstage-frontend
+  TECHDOCS_WORKER_IMAGE_NAME: backstage-test-1/backstage-techdocs
+  TEST_IMAGE_TAG: techdocs-remote-worker-test
+  MANIFESTS_BRANCH: feat/techdocs-remote-worker
+  MANIFESTS_REPO_DIR: backstage-manifests-test
+
+jobs:
+  build-test-images:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout backstage-app
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Clone manifests repository for test frontend config
+        env:
+          GITOPS_TOKEN: ${{ secrets.GITOPS_TOKEN }}
+        run: |
+          git clone \
+            --branch "${MANIFESTS_BRANCH}" \
+            --single-branch \
+            https://x-access-token:${GITOPS_TOKEN}@github.com/backstage-test-1/backstage-manifests.git \
+            "${MANIFESTS_REPO_DIR}"
+
+      - name: Extract test frontend build config
+        id: build-config
+        run: |
+          BUILD_CONFIG_PATH="${RUNNER_TEMP}/app-config.techdocs-test.yaml"
+          node scripts/extract-k8s-app-config.cjs \
+            "${MANIFESTS_REPO_DIR}/platform/backstage/overlays/techdocs-split-test/patch-configmap-app-config.yaml" \
+            "${BUILD_CONFIG_PATH}"
+          echo "build_config_path=${BUILD_CONFIG_PATH}" >> "$GITHUB_OUTPUT"
+
+      - name: Build TypeScript definitions
+        run: yarn tsc
+
+      - name: Build frontend package
+        run: yarn workspace app build --config "${{ steps.build-config.outputs.build_config_path }}"
+
+      - name: Build backend package
+        run: yarn workspace backend build
+
+      - name: Build TechDocs worker package
+        run: yarn workspace techdocs-worker build
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR_TOKEN }}
+
+      - name: Build and push backend test image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./packages/backend/Dockerfile
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.BACKEND_IMAGE_NAME }}:${{ github.sha }}
+            ${{ env.REGISTRY }}/${{ env.BACKEND_IMAGE_NAME }}:${{ env.TEST_IMAGE_TAG }}
+
+      - name: Build and push frontend test image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./packages/app/Dockerfile
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE_NAME }}:${{ github.sha }}
+            ${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE_NAME }}:${{ env.TEST_IMAGE_TAG }}
+
+      - name: Build and push TechDocs worker test image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./packages/techdocs-worker/Dockerfile
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.TECHDOCS_WORKER_IMAGE_NAME }}:${{ github.sha }}
+            ${{ env.REGISTRY }}/${{ env.TECHDOCS_WORKER_IMAGE_NAME }}:${{ env.TEST_IMAGE_TAG }}
+
+      - name: Summary
+        run: |
+          echo "## Test Image Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- **Frontend Image**: ghcr.io/backstage-test-1/backstage-frontend:${TEST_IMAGE_TAG}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Backend Image**: ghcr.io/backstage-test-1/backstage-backend:${TEST_IMAGE_TAG}" >> $GITHUB_STEP_SUMMARY
+          echo "- **TechDocs Worker Image**: ghcr.io/backstage-test-1/backstage-techdocs:${TEST_IMAGE_TAG}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Deployment**: Manual test overlay only; no GitOps repo sync is performed" >> $GITHUB_STEP_SUMMARY

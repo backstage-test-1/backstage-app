@@ -15985,6 +15985,7 @@ __metadata:
     "@backstage/backend-plugin-api": "npm:^1.7.0"
     "@backstage/cli": "npm:^0.35.4"
     "@backstage/config": "npm:^1.3.6"
+    "@backstage/integration": "npm:^1.20.0"
     "@backstage/plugin-auth-backend": "npm:^0.27.0"
     "@backstage/plugin-auth-backend-module-github-provider": "npm:^0.5.0"
     "@backstage/plugin-auth-backend-module-guest-provider": "npm:^0.2.16"
@@ -16013,6 +16014,7 @@ __metadata:
     better-sqlite3: "npm:^12.0.0"
     node-gyp: "npm:^10.0.0"
     pg: "npm:^8.11.3"
+    tar: "npm:^7.5.9"
   languageName: unknown
   linkType: soft
 
@@ -31829,6 +31831,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"tar@npm:^7.5.9":
+  version: 7.5.11
+  resolution: "tar@npm:7.5.11"
+  dependencies:
+    "@isaacs/fs-minipass": "npm:^4.0.0"
+    chownr: "npm:^3.0.0"
+    minipass: "npm:^7.1.2"
+    minizlib: "npm:^3.1.0"
+    yallist: "npm:^5.0.0"
+  checksum: 10c0/b6bb420550ef50ef23356018155e956cd83282c97b6128d8d5cfe5740c57582d806a244b2ef0bf686a74ce526babe8b8b9061527623e935e850008d86d838929
+  languageName: node
+  linkType: hard
+
 "tarn@npm:^3.0.2":
   version: 3.0.2
   resolution: "tarn@npm:3.0.2"
@@ -31844,6 +31859,23 @@ __metadata:
   checksum: 10c0/10187b8144b112fcdfd3a5e4e9068efa42c990b1e30cd0d4f35ee8f58f16d1b41bc587e668fa7a6f6ca31308961cbd06cd5d4a4ae1dc388335902ae04f7d57df
   languageName: node
   linkType: hard
+
+"techdocs-worker@workspace:packages/techdocs-worker":
+  version: 0.0.0-use.local
+  resolution: "techdocs-worker@workspace:packages/techdocs-worker"
+  dependencies:
+    "@backstage/cli": "npm:^0.35.4"
+    "@backstage/config": "npm:^1.3.6"
+    "@backstage/config-loader": "npm:^1.10.8"
+    "@backstage/plugin-techdocs-node": "npm:^1.14.2"
+    "@types/express": "npm:^4.17.25"
+    "@types/multer": "npm:^2.0.0"
+    express: "npm:^4.22.1"
+    multer: "npm:^2.0.2"
+    tar: "npm:^7.5.9"
+    winston: "npm:^3.19.0"
+  languageName: unknown
+  linkType: soft
 
 "teeny-request@npm:^9.0.0":
   version: 9.0.0
@@ -33627,7 +33659,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"winston@npm:^3.2.1":
+"winston@npm:^3.19.0, winston@npm:^3.2.1":
   version: 3.19.0
   resolution: "winston@npm:3.19.0"
   dependencies:

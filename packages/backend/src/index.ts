@@ -13,6 +13,7 @@ backend.add(
 
 // techdocs plugin
 backend.add(import('@backstage/plugin-techdocs-backend'));
+backend.add(import('./extensions/remoteTechdocsGeneratorExtension'));
 
 // auth plugin
 backend.add(import('@backstage/plugin-auth-backend'));
