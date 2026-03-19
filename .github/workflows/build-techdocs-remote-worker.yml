@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - feat/techdocs-remote-worker
+      - feat/techdocs-remote-worker-#22
     paths:
       - 'packages/app/**'
       - 'packages/backend/**'
